@@ -2,6 +2,10 @@ from django.shortcuts import render, redirect
 from .models import Profile, Dweet
 from .forms import DweetForm
 
+from django.contrib.auth import login
+from django.urls import reverse
+from dwitter.forms import CustomUserCreationForm
+
 
 def dashboard(request):
     form = DweetForm(request.POST or None)
@@ -19,6 +23,20 @@ def dashboard(request):
         "dwitter/dashboard.html",
         {"form": form, "dweets": followed_dweets},
     )
+
+
+def register(request):
+    if request.method == "GET":
+        return render(
+            request, "users/register.html",
+            {"form": CustomUserCreationForm}
+        )
+    elif request.method == "POST":
+        form = CustomUserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            return redirect(reverse("dashboard"))
 
 
 def profile_list(request):
